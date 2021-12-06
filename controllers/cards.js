@@ -1,15 +1,20 @@
+const { ERROR_500, ERROR_400, ERROR_404 } = require("../errors/errors");
 const Card = require("../models/card");
 
 const getCards = (req, res) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch(() => res.send({ message: "Произошла ошибка" }));
 };
 
 const deleteCardById = (req, res) => {
   Card.findByIdAndRemove(req.params._id)
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch(() =>
+      res
+        .status(ERROR_404)
+        .send({ message: "Карточка с указанным id не найдена." })
+    );
 };
 
 const createCard = (req, res) => {
@@ -17,7 +22,15 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res.status(ERROR_400).send({
+          message: "Переданы некорректные данные при создании карточки.",
+        });
+      } else {
+        res.status(ERROR_500).send({ message: "Произошла ошибка." });
+      }
+    });
 };
 
 const likeCard = (req, res) => {
@@ -28,7 +41,15 @@ const likeCard = (req, res) => {
     { new: true }
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(ERROR_404).send({
+          message: "Передан несуществующий id карточки. ",
+        });
+      } else {
+        res.status(ERROR_500).send({ message: "Произошла ошибка." });
+      }
+    });
 };
 
 const dislikeCard = (req, res) => {
@@ -39,7 +60,15 @@ const dislikeCard = (req, res) => {
     { new: true }
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(ERROR_404).send({
+          message: "Передан несуществующий id карточки. ",
+        });
+      } else {
+        res.status(ERROR_500).send({ message: "Произошла ошибка." });
+      }
+    });
 };
 
 module.exports = {
