@@ -9,7 +9,11 @@ const getUsers = (req, res) => {
 
 const getUsersById = (req, res) => {
   User.findById(req.params._id)
-    .then((user) => res.send({ data: user}))
+    .then((user) =>
+      res.send({
+        data: { name: user.name, about: user.about, avatar: user.avatar, _id: user._id },
+      })
+    )
     .catch(() =>
       res
         .status(ERROR_404)
