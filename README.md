@@ -1,14 +1,12 @@
-# Проект Mesto фронтенд + бэкенд
+# Project Mesto backend
 
-## Директории
+## Directories
 
-`/routes` — папка с файлами роутера  
-`/controllers` — папка с файлами контроллеров пользователя и карточки   
-`/models` — папка с файлами описания схем пользователя и карточки  
-  
-Остальные директории вспомогательные, создаются при необходимости разработчиком
+`/routes` — folder containing routes
+`/controllers` — folder containing controllers
+`/models` — folder containing models
 
 ## Запуск проекта
 
-`npm run start` — запускает сервер   
-`npm run dev` — запускает сервер с hot-reload
+`npm run start` — launches server
+`npm run dev` — launches server with hot-reload
