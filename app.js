@@ -1,23 +1,28 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
+const { loginValidation, createUserValidation } = require('./middlewares/errors');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '61ac92a617e52314174db99f',
-  };
-  next();
+app.use(cookieParser());
+app.post('/signin', loginValidation, login);
+app.post('/signup', createUserValidation, createUser);
+app.use('/', auth, userRouter);
+app.use('/', auth, cardRouter);
+app.use(() => {
+  throw new NotFoundError('Произошла ошибка.');
 });
-app.use(userRouter);
-app.use(cardRouter);
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.listen(PORT);
