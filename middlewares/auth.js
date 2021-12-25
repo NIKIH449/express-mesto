@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { ERROR_403 } = require('../errors/errors');
+const WrongLoginData = require('../errors/WrongLoginData');
 
 const auth = (req, res, next) => {
   const token = req.cookies.jwt;
@@ -7,7 +7,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    res.status(ERROR_403).send({ message: 'Нужно авторизоваться.' });
+    throw new WrongLoginData('Требуется авторизация.');
   }
   req.user = payload;
   next();

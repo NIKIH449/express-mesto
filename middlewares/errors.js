@@ -28,7 +28,11 @@ const userInfoValidation = celebrate({
     about: Joi.string().required().min(2).max(30),
   }),
 });
-
+const idValidation = celebrate({
+  params: Joi.object().keys({
+    _id: Joi.string().hex().length(24).required(),
+  }),
+});
 const createUserValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -40,6 +44,7 @@ const createUserValidation = celebrate({
 });
 
 module.exports = {
+  idValidation,
   cardValidation,
   loginValidation,
   createUserValidation,
