@@ -20,8 +20,14 @@ app.post('/signin', loginValidation, login);
 app.post('/signup', createUserValidation, createUser);
 app.use('/', auth, userRouter);
 app.use('/', auth, cardRouter);
-app.use(() => {
-  throw new NotFoundError('Произошла ошибка.');
+app.use('*', () => {
+  throw new NotFoundError('Такой страницы не существует.');
+});
+app.use((err, req, res, next) => {
+  const status = err.statusCode || 500;
+  const { message } = err;
+  res.status(status).json({ err: message || 'Произошла ошибка на сервере' });
+  return next();
 });
 mongoose.connect('mongodb://localhost:27017/mestodb');
 

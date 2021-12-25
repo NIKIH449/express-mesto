@@ -1,17 +1,22 @@
-const { ERROR_500 } = require('../errors/errors');
 const Card = require('../models/card');
 const Forbidden = require('../errors/Forbidden');
 const NotFoundError = require('../errors/NotFoundError');
 const WrongData = require('../errors/WrongData');
+const DefaultError = require('../errors/DefaultError');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => res.send({ message: 'Произошла ошибка' }));
+    .catch(() => {
+      throw new DefaultError('Произошла ошибка');
+    })
+
+    .catch(next);
 };
 
 const deleteCardById = (req, res, next) => {
   Card.findById(req.params._id)
+    .orFail(new NotFoundError('Картока не найдена'))
     .then((cards) => {
       if (req.user._id === cards.owner.toString()) {
         Card.findByIdAndRemove(req.params._id).then((card) => {
@@ -19,13 +24,6 @@ const deleteCardById = (req, res, next) => {
         });
       } else {
         throw new Forbidden('Нельзя удалять чужую карочку');
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new WrongData('Передан несуществующий id карточки');
-      } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка' });
       }
     })
     .catch(next);
@@ -40,7 +38,7 @@ const createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new WrongData('Переданы неверные данные.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
@@ -64,7 +62,7 @@ const likeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new WrongData('Передан несуществующий id карточки.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
@@ -88,7 +86,7 @@ const dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new WrongData('Переданы неверные данные.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);

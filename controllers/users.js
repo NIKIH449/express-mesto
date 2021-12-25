@@ -1,22 +1,27 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const {
-  ERROR_500, ERROR_404, ERROR_509,
-} = require('../errors/errors');
+const { ERROR_509 } = require('../errors/errors');
 const NotFoundError = require('../errors/NotFoundError');
 const WrongData = require('../errors/WrongData');
+const DefaultError = require('../errors/DefaultError');
 const User = require('../models/user');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => {
+      throw new DefaultError('Произошла ошибка');
+    })
+    .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => res.send({ user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => {
+      throw new NotFoundError('Данные пользователя не найдены.');
+    })
+    .catch(next);
 };
 
 const login = (req, res, next) => {
@@ -47,13 +52,6 @@ const getUsersById = (req, res, next) => {
             _id: user._id,
           },
         });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new WrongData('Переданы некорректные данные.');
-      } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
       }
     })
     .catch(next);
@@ -89,7 +87,7 @@ const createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new WrongData('Переданы некорректные данные.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     });
 };
@@ -109,7 +107,7 @@ const updateAvatar = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new WrongData('Переданы некорректные данные.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
@@ -125,9 +123,7 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(ERROR_404).send({
-          message: 'Данные пользователя не найдены.',
-        });
+        throw new NotFoundError('Произошла ошибка');
       } else {
         res.send({ data: user });
       }
@@ -136,7 +132,7 @@ const updateUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new NotFoundError('Данные пользователя не найдены.');
       } else {
-        res.status(ERROR_500).send({ message: 'Произошла ошибка.' });
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
