@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
@@ -23,10 +24,11 @@ app.use('/', auth, cardRouter);
 app.use('*', () => {
   throw new NotFoundError('Такой страницы не существует.');
 });
+app.use(errors());
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const { message } = err;
-  res.status(status).json({ err: message || 'Произошла ошибка на сервере' });
+  res.status(status).json({ message: message || 'Произошла ошибка на сервере' });
   return next();
 });
 mongoose.connect('mongodb://localhost:27017/mestodb');

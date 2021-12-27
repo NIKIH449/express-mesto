@@ -16,7 +16,7 @@ const getCards = (req, res, next) => {
 
 const deleteCardById = (req, res, next) => {
   Card.findById(req.params._id)
-    .orFail(new NotFoundError('Картока не найдена'))
+    .orFail(new NotFoundError('Карточка не найдена'))
     .then((cards) => {
       if (req.user._id === cards.owner.toString()) {
         Card.findByIdAndRemove(req.params._id).then((card) => {
@@ -51,19 +51,9 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: owner } },
     { new: true },
   )
+    .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Картока не найдена');
-      } else {
-        res.send({ data: card });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new WrongData('Передан несуществующий id карточки.');
-      } else {
-        throw new DefaultError('Произошла ошибка');
-      }
+      res.send({ data: card });
     })
     .catch(next);
 };
@@ -75,19 +65,9 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: owner } },
     { new: true },
   )
+    .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (!card) {
-        throw new WrongData('Переданы неверные данные.');
-      } else {
-        res.send({ data: card });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new WrongData('Переданы неверные данные.');
-      } else {
-        throw new DefaultError('Произошла ошибка');
-      }
+      res.send({ data: card });
     })
     .catch(next);
 };
