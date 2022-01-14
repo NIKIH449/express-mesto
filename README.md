@@ -6,7 +6,7 @@
 `/controllers` — folder containing controllers
 `/models` — folder containing models
 
-## Запуск проекта
+## Launch
 
 `npm run start` — launches server
 `npm run dev` — launches server with hot-reload
